@@ -4,7 +4,10 @@ import com.example.linkshrinker.service.KeyMapperService
 import com.example.linkshrinker.service.KeyMapperService.Get.Link
 import com.example.linkshrinker.service.KeyMapperService.Get.NotFound
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.RestController
 import javax.servlet.http.HttpServletResponse
 
 @RestController
@@ -38,11 +41,5 @@ class RedirectController
                 respone.status = 404
             }
         }
-    }
-
-    @GetMapping(value = "/add/{key}/{link}")
-    fun addLink(@PathVariable key: String, @PathVariable link: String)
-    {
-        keyMapperService.addKey(key, link)
     }
 }

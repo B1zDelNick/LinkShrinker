@@ -1,6 +1,6 @@
 package com.example.linkshrinker.service
 
-interface KeyMapperService
+interface KeyMapperServiceOld
 {
     interface Add
     {
@@ -14,6 +14,6 @@ interface KeyMapperService
         data class NotFound(val key: String) : Get
     }
 
-    fun addLink(link: String): String
-    fun getLink(key: String): Get
+    fun addKey(key: String, link: String): Add
+    fun getLink(link: String): Get
 }

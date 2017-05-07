@@ -1,61 +1,63 @@
 package com.example.linkshrinker.service
 
+import com.example.linkshrinker.model.Link
+import com.example.linkshrinker.model.LinkRepository
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Rule
+import org.junit.Before
 import org.junit.Test
-import org.junit.rules.ExpectedException
-import org.junit.runner.RunWith
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.junit4.SpringRunner
+import org.mockito.BDDMockito.given
+import org.mockito.InjectMocks
+import org.mockito.Matchers.anyLong
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
+import java.util.*
 
-@RunWith(SpringRunner::class)
-@SpringBootTest
 class KeyMapperServiceUnitTest
 {
-    val serviceUnderTest: KeyMapperService = DeafaultKeyMapperService()
+    @InjectMocks
+    val serviceUnderTest : KeyMapperService = DefaultKeyMapperService()
 
-    @get:Rule
-    val thrown : ExpectedException = ExpectedException.none()
+    @Mock
+    lateinit var converter : KeyConverterService
 
-    @Test
-    //fun addKey_WhenKeyAndLinkOk_ShouldReturnSuccess()
-    fun addKey_ShouldReturnSuccess()
+    @Mock
+    lateinit var repository : LinkRepository
+
+    private val LINK_A = "http://www.google.com"
+    private val LINK_B = "http://www.wow.com"
+
+    @Before
+    fun setup()
     {
-        assertThat(serviceUnderTest.addKey(KEY, LINK)).isEqualTo(KeyMapperService.Add.Success(KEY, LINK))
+        MockitoAnnotations.initMocks(this)
     }
 
-    @Test
-    fun getLink_ShouldReturnLink()
-    {
-        serviceUnderTest.addKey(KEY, LINK)
-        assertThat(serviceUnderTest.getLink(KEY)).isEqualTo(KeyMapperService.Get.Link(LINK))
-    }
+    private val KEY_A = "abc"
+    private val ID_A = 1000000L
+    private val KEY_B = "zxc"
+    private val ID_B = 1000001L
 
     @Test
-    fun addKey_WhenDuplicateKey_ShouldReturnAlreadyExists()
+    fun addLink_WhenSuccess_ShouldReturnKey()
     {
-        serviceUnderTest.addKey(KEY, LINK)
-        assertThat(serviceUnderTest.addKey(KEY, NEW_LINK)).isEqualTo(KeyMapperService.Add.AlreadyExists(KEY))
-        assertThat(serviceUnderTest.getLink(KEY)).isNotEqualTo(KeyMapperService.Get.Link(NEW_LINK))
-        assertThat(serviceUnderTest.getLink(KEY)).isEqualTo(KeyMapperService.Get.Link(LINK))
-    }
+        given(converter.keyToId(KEY_A)).willReturn(ID_A)
+        given(converter.idToKey(ID_A)).willReturn(KEY_A)
 
-    @Test
-    fun getLink_WhenKeyIsNotPresent_ShouldReturnNotFound()
-    {
-        assertThat(serviceUnderTest.getLink(KEY)).isEqualTo(KeyMapperService.Get.NotFound(KEY))
-    }
+        given(converter.keyToId(KEY_B)).willReturn(ID_B)
+        given(converter.idToKey(ID_B)).willReturn(KEY_B)
 
-    @Test
-    fun addKey_WhenKeyOrLinkIsNull_ShouldThrowException()
-    {
+        given(repository.findOne(anyLong())).willReturn(Optional.empty())
+        given(repository.save(Link(text = LINK_A))).willReturn(Link(ID_A, LINK_A))
+        given(repository.save(Link(text = LINK_B))).willReturn(Link(ID_B, LINK_B))
+        given(repository.findOne(ID_A)).willReturn(Optional.of(Link(ID_A, LINK_A)))
+        given(repository.findOne(ID_B)).willReturn(Optional.of(Link(ID_B, LINK_B)))
 
-    }
+        val keyA = serviceUnderTest.addLink(LINK_A)
+        assertThat(serviceUnderTest.getLink(keyA)).isEqualTo(KeyMapperService.Get.Link(LINK_A))
 
-    companion object
-    {
-        private const val KEY = "key1"
-        private const val LINK = "link1"
-        private const val NEW_LINK = "link2"
+        val keyB = serviceUnderTest.addLink(LINK_B)
+        assertThat(serviceUnderTest.getLink(keyB)).isEqualTo(KeyMapperService.Get.Link(LINK_B))
+
+        assertThat(keyA).isNotEqualTo(keyB)
     }
 }

