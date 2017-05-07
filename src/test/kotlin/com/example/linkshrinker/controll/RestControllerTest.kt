@@ -42,9 +42,6 @@ class RestControllerTest
         mockMvc = MockMvcBuilders.webAppContextSetup(contex).build()
     }
 
-    private val LINK = "link"
-    private val KEY = "key"
-
     @Test
     fun test1()
     {
@@ -69,5 +66,11 @@ class RestControllerTest
                 .andExpect(status().isOk)
                 .andExpect(content().string(containsString(KEY)))
                 .andExpect(content().string(containsString(LINK)))
+    }
+
+    companion object
+    {
+        private const val LINK = "link"
+        private const val KEY = "key"
     }
 }
